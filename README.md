@@ -1,249 +1,276 @@
-# Better-Code · 塔式多Agent协作编程
+# Better-Code · Tower-Style Multi-Agent Collaborative Coding
 
-[English](#english) | [中文](#中文)
+[English](#english) | [中文](#chinese)
 
 ---
 
 <a id="english"></a>
 ## English
 
-**Better-Code** is an opencode skill that implements a tower-style multi-agent collaborative coding workflow. A single **Project Lead** agent interfaces directly with you (the Client), orchestrating up to 7 specialized sub-agent teams through a structured 6-phase pipeline — from requirements analysis to production-ready code.
+**Better-Code** is an opencode skill implementing a tower-style multi-agent coding workflow. A single **Project Lead** agent interfaces with you (the Client), orchestrating up to **11 specialized sub-agent roles** through a structured 6-phase pipeline — from requirements to production-ready code. Scales from solo projects to enterprise multi-team systems.
 
 ### Architecture
 
 ```
-┌─────────────────────────────────────────┐
-│         Client (User / 甲方)             │
-│              ▲  │  direct comm           │
-│              │  ▼  only                 │
-│     ┌──────────────────────┐            │
-│     │   Project Lead (主Agent) │◄── Tower top
-│     └──┬───┬───┬───┬───┬──┬┘            │
-│        │   │   │   │   │  │             │
-│  ┌─────▼┐ ┌▼──┐ ┌▼──┐ │  │  ┌▼──────┐  │
-│  │需求分析│ │方案│ │架构│ │  │  │前端设计│  │
-│  │ (≤3) │ │评估│ │(×1)│ │  │  │ (×1)  │  │
-│  └──────┘ │(≤3)│ └────┘ │  │  └───────┘  │
-│           └────┘        │  │             │
-│         ┌────▼────┐  ┌──▼──▼──┐         │
-│         │代码编程  │  │代码审核 │         │
-│         │ (≤3)    │  │ (≤3)   │         │
-│         └────┬────┘  └────┬───┘         │
-│              │            │             │
-│         ┌────▼────────────▼──┐          │
-│         │   测试工程师 (≤3)   │          │
-│         └───────────────────┘          │
-└─────────────────────────────────────────┘
+Client (甲方)
+  │
+  └── Project Lead (Tower Top) ── sole interface
+        │
+        ├── Requirements Analyst (×≤3)
+        ├── Solution Evaluator (×≤3)
+        ├── Code Architect (×1)
+        ├── Code Programmer (×≤3)
+        ├── Code Reviewer (×≤3)
+        ├── Frontend Designer (×1)
+        ├── Test Engineer (×≤3)
+        │
+        ├── [Tier 2] DevOps Engineer (×1)
+        ├── [Tier 3] Security Auditor (×1)
+        ├── [Tier 3] Technical Writer (×1)
+        └── [Tier 3] Project Manager (×1)
 ```
+
+### Tiered Scaling
+
+Choose your team size. Start small, scale up as needed.
+
+| Tier | Use Case | Roles | Gate Upgrades |
+|------|----------|-------|---------------|
+| **1 · Solo** | ≤5 modules, single dev | 7 core roles | type-check + test + build |
+| **2 · Team** | 6-15 modules, 1-2 parallel teams | + DevOps | + coverage ≥80%, dependency audit, ADR, dev/staging envs |
+| **3 · Enterprise** | 16+ modules, 3+ parallel teams | + Security Auditor, Tech Writer, Project Manager | + OWASP scan, secret detection, contract/E2E tests, incident response, multi-team coordination |
+
+The Project Lead scans your project and recommends a tier during initialization. **You always have the final say** — add or remove any role or rule.
 
 ### Key Features
 
-- **Tower-Style Management** — One Project Lead, many specialists. No sub-agent ever talks to the Client directly.
-- **6-Phase Pipeline** — Init → Requirements → Evaluation → Architecture → Implementation (Code → Review → Test) → Delivery
-- **7 Specialized Agent Roles** — Requirements Analyst, Solution Evaluator, Code Architect, Code Programmer, Code Reviewer, Frontend Designer, Test Engineer
-- **Parallel Execution** — Up to 3 programmers/analysts/evaluators/reviewers working in parallel on independent modules
-- **Built-in Quality Gates** — Code review classifies issues as architecture-level or coding-level, routing fixes to the right agent
-- **Iteration Safeguards** — Max iterations per phase prevent infinite loops; Client makes the final call at limits
-- **Client-First Decision Making** — The Client is always in control. Every milestone, every git push requires approval.
-- **Domain-Unfamiliarity Protection** — When the Client is unfamiliar with a domain, the system warns about key considerations BEFORE asking for decisions.
-- **Smart Testing** — Auto-tests what's testable; produces manual test guides for code requiring DB connections, internal networks, or third-party APIs.
-- **Git Integration** — Standardized commit messages (type + scope + files + reason + result), branch strategy, push-approval policy.
-- **Process Tracking** — `process.md` tracks every subtask with `@agent-name` accountability tags.
+- **One Interface** — Project Lead is the sole bridge to sub-agents. Never direct sub-agent ↔ Client communication.
+- **6-Phase Pipeline** — Init → Requirements → Evaluation → Architecture → Implementation (Code → Review → Test → UI Review) → Delivery & Retrospective
+- **11 Agent Roles** — 7 core + 4 extended (DevOps, Security, Docs, PM) activated by tier
+- **Parallel Execution** — Modules marked `[可并行]` run concurrently (up to 3 agents). File ownership enforced — zero overlap.
+- **Quality Gates** — Pre-commit (lint + type-check), pre-merge (test + build + coverage + audit). Merge blocked on failure.
+- **Git Governance** — Standardized commits, feature branches, pre-merge gate (`merge --no-commit` → verify → commit), rollback procedures, semantic versioning + changelog
+- **Iteration Safeguards** — Max iterations per phase; Client decides at limits
+- **Smart Testing** — Unit/integration tests for testable code; manual test guides for DB/network/API-dependent code
+- **Client-Controlled** — Every milestone, every `git push`, every tier decision requires your approval
+- **Retrospective** — Post-delivery review: what worked, what broke, how to improve the skill itself
 
-### Workflow Phases
+### File Structure
 
-| Phase | Agents | Output |
-|-------|--------|--------|
-| **0. Init** | Project Lead | `agents_files/`, `.opencode/agents/`, virtual env, git setup |
-| **1. Requirements** | Lead + Analysts (≤3) | `agents_files/requirements/需求文档_vN.md` |
-| **2. Evaluation** | Evaluators (≤3) | `agents_files/evaluations/方案评估报告_vN.md` |
-| **3. Architecture** | Architect (×1) | `agents_files/architecture/architecture_design.md` |
-| **4. Implementation** | Programmers (≤3) → Reviewers (≤3) → Testers (≤3) → Frontend (×1, optional) | Code + review reports + test reports |
-| **5. Delivery** | Project Lead | Git commit with Client approval |
-
-### Agent Roles
-
-| # | Role | Max | Responsibility |
-|---|------|-----|----------------|
-| 1 | **需求分析师** (Requirement Analyst) | 3 | Brainstorm needs, identify gaps, warn about unfamiliar domains |
-| 2 | **方案评估师** (Solution Evaluator) | 3 | Assess feasibility, time, risk; recommend ✅/⚠️/❌ |
-| 3 | **代码架构师** (Code Architect) | 1 | Design architecture, module breakdown, dependency graph |
-| 4 | **代码编程师** (Code Programmer) | 3 | Implement assigned modules per spec |
-| 5 | **代码审核师** (Code Reviewer) | 3 | Review code, classify issues (architecture-level vs coding-level) |
-| 6 | **前端设计师** (Frontend Designer) | 1 | UI/UX review (web projects only) |
-| 7 | **测试工程师** (Test Engineer) | 3 | Write/run tests; manual guides for untestable code |
+```
+skills/better-code/
+├── SKILL.md                     # Orchestrator: overview, scaling matrix, file index
+├── config-example.jsonc         # opencode.jsonc command registration example
+├── roles/                       # Agent role definitions (one per file)
+│   ├── requirement-analyst.md   # Tier 1
+│   ├── evaluation-analyst.md    # Tier 1
+│   ├── code-architect.md        # Tier 1
+│   ├── code-programmer.md       # Tier 1
+│   ├── code-reviewer.md         # Tier 1
+│   ├── frontend-designer.md     # Tier 1 (web only)
+│   ├── test-engineer.md         # Tier 1
+│   ├── devops-engineer.md       # Tier 2
+│   ├── security-auditor.md      # Tier 3
+│   ├── tech-writer.md           # Tier 3
+│   └── project-manager.md       # Tier 3
+├── phases/                      # Phase workflows
+│   ├── 01-initialization.md     # Project scan + tier recommendation + setup
+│   ├── 02-requirements.md       # Brainstorming, clarification, doc format
+│   ├── 03-evaluation.md         # Feasibility, time, risk analysis
+│   ├── 04-architecture.md       # Module breakdown, dependency graph, file ownership
+│   ├── 05-implementation.md     # Code → Review → Test → UI Review → Merge
+│   └── 06-delivery.md           # Acceptance, version tag, changelog, retrospective
+├── governance/                  # Cross-cutting rules
+│   ├── git-management.md        # Branch strategy, commit template, merge gate, rollback
+│   ├── quality-gates.md         # Type-check / test / build / coverage / lint / audit
+│   ├── environment-strategy.md  # dev/staging/prod separation, secret management (Tier 2+)
+│   └── incident-response.md     # Severity classification, rollback decision tree (Tier 3)
+└── templates/                   # Document format templates
+    ├── requirement-doc.md
+    ├── evaluation-report.md
+    ├── architecture-doc.md
+    ├── code-review-report.md
+    ├── adr.md                    # Architecture Decision Record (Tier 2+)
+    └── changelog.md
+```
 
 ### Installation
 
-1. Copy `SKILL.md` to your global or project skills directory:
+1. Copy the entire `better-code/` directory to your skills location:
 
    ```
    # Global (all projects)
-   ~/.config/opencode/skills/better-code/SKILL.md
+   ~/.config/opencode/skills/better-code/
 
    # Project-specific
-   .opencode/skills/better-code/SKILL.md
+   .opencode/skills/better-code/
    ```
 
-2. Register the `/better-code` command in your `opencode.json` or `opencode.jsonc`:
-
-   ```jsonc
-   {
-     "$schema": "https://opencode.ai/config.json",
-     "command": {
-       "better-code": {
-         "description": "启动塔式多Agent协作编程流程",
-         "prompt": "加载 better-code skill，以项目负责人身份接管当前项目..."
-       }
-     }
-   }
-   ```
-
-   See `config-example.jsonc` for the full command prompt.
+2. Register `/better-code` in your `opencode.json` or `opencode.jsonc` (see `config-example.jsonc`)
 
 3. Restart opencode.
 
 ### Quick Start
 
-1. Navigate to your project directory in opencode
+1. Navigate to your project in opencode
 2. Type `/better-code`
-3. The Project Lead will check if `agents_files/` exists:
-   - **New project**: Type `请你先初始化` to initialize the workspace
-   - **Existing session**: Resumes from `process.md` last checkpoint
-4. Answer the initialization questions (tech stack, virtual environment, work scope)
-5. Describe your requirements — the pipeline begins.
+3. If first time in this project: type `请你先初始化`
+   - The Project Lead scans your project and recommends a tier
+   - You confirm (or customize) the team configuration
+   - Workspace is created automatically
+4. Describe your requirements — the pipeline begins.
 
-### Git Commit Convention
+### Workflow Phases
+
+| Phase | Agents | Output |
+|-------|--------|--------|
+| **0. Init** | Project Lead | `agents_files/`, `.opencode/agents/`, env, git, tier config |
+| **1. Requirements** | Lead + Analysts (≤3) | `requirements/需求文档_vN.md` |
+| **2. Evaluation** | Evaluators (≤3) | `evaluations/方案评估报告_vN.md` |
+| **3. Architecture** | Architect (×1) | `architecture/architecture_design.md` |
+| **4. Implementation** | Programmers → Reviewers → Testers → Frontend | Code + review reports + test reports |
+| **5. Delivery** | Project Lead | Merge → tag → changelog → retrospective |
+
+### Project Workspace (created on init)
+
+```
+project_root/
+├── agents_files/              # Agent workspace (gitignored)
+│   ├── process.md             # Progress tracker with @agent-name tags
+│   ├── requirements/
+│   ├── evaluations/
+│   ├── architecture/
+│   ├── code_reviews/
+│   ├── tests/
+│   └── agent_memory/
+├── .opencode/
+│   └── agents/                # Agent definition files (auto-generated by tier)
+└── .gitignore                 # +agents_files/
+```
+
+### Git Convention
 
 ```
 <type>(<scope>): <brief description>
 
 修改文件:
-- path/to/file1.py (<新增/修改/删除>)
-- path/to/file2.py
+- path/to/file1.ext (<新增/修改/删除>)
 
-修改原因: <why this change>
+修改原因: <why>
 
-修改结果: <what effect this change achieves>
+修改结果: <what>
 ```
 
-Types: `feat` | `fix` | `refactor` | `style` | `docs` | `test` | `chore`
+Types: `feat` | `fix` | `refactor` | `style` | `docs` | `test` | `chore` | `revert`
 
-### Project Workspace
-
-After initialization, the project gains:
-
-```
-project_root/
-├── agents_files/              # Agent workspace (gitignored)
-│   ├── process.md             # Progress tracker
-│   ├── requirements/          # Requirement docs
-│   ├── evaluations/           # Evaluation reports
-│   ├── architecture/          # Architecture designs
-│   ├── code_reviews/          # Code review reports
-│   ├── tests/                 # Test reports & guides
-│   └── agent_memory/          # Agent state persistence
-├── .opencode/
-│   └── agents/                # Agent definition files (7 agents)
-│       ├── requirement-analyst.md
-│       ├── evaluation-analyst.md
-│       ├── code-architect.md
-│       ├── code-programmer.md
-│       ├── code-reviewer.md
-│       ├── frontend-designer.md
-│       └── test-engineer.md
-└── .gitignore                 # +agents_files/
-```
-
-### Permissions
-
-Sub-agent permissions are reviewed by the Project Lead. If the scope is unclear, the Project Lead asks the Client: *"What is the team's acceptable working range?"* (e.g., external network access, file modifications outside project root).
+Mandatory commits on 9 trigger events — no Client reminder needed.
 
 ### License
 
-MIT — see [LICENSE](LICENSE) file.
+MIT — see [LICENSE](LICENSE).
 
 ---
 
-<a id="中文"></a>
+<a id="chinese"></a>
 ## 中文
 
-**Better-Code** 是一个 opencode skill，实现了塔式多 Agent 协作编程工作流。一个 **项目负责人 (Project Lead)** 作为与您（甲方）的唯一接口，协调整合最多 7 种专业子 Agent 团队，通过 6 个结构化阶段推进项目——从需求分析到可交付代码。
+**Better-Code** 是一个 opencode skill，实现塔式多 Agent 协作编程工作流。一个 **项目负责人 (Project Lead)** 作为与您（甲方）的唯一接口，协调整合最多 **11 种专业 Agent 角色**，通过 6 个结构化阶段推进项目。从单人项目到企业级多团队系统均可伸缩。
 
-### 架构图
+### 架构
 
 ```
-┌─────────────────────────────────────────┐
-│         用户 (甲方 / Client)              │
-│              ▲  │  唯一沟通通道            │
-│              │  ▼                       │
-│     ┌──────────────────────┐            │
-│     │   项目负责人 (主Agent)  │◄── 塔顶     │
-│     └──┬───┬───┬───┬───┬──┬┘            │
-│        │   │   │   │   │  │             │
-│  ┌─────▼┐ ┌▼──┐ ┌▼──┐ │  │  ┌▼──────┐  │
-│  │需求分析│ │方案│ │架构│ │  │  │前端设计│  │
-│  │ (≤3) │ │评估│ │(×1)│ │  │  │ (×1)  │  │
-│  └──────┘ │(≤3)│ └────┘ │  │  └───────┘  │
-│           └────┘        │  │             │
-│         ┌────▼────┐  ┌──▼──▼──┐         │
-│         │代码编程  │  │代码审核 │         │
-│         │ (≤3)    │  │ (≤3)   │         │
-│         └────┬────┘  └────┬───┘         │
-│              │            │             │
-│         ┌────▼────────────▼──┐          │
-│         │   测试工程师 (≤3)   │          │
-│         └───────────────────┘          │
-└─────────────────────────────────────────┘
+甲方 (Client)
+  │
+  └── 项目负责人 (塔顶) ── 唯一沟通桥梁
+        │
+        ├── 需求分析师 (×≤3)
+        ├── 方案评估师 (×≤3)
+        ├── 代码架构师 (×1)
+        ├── 代码编程师 (×≤3)
+        ├── 代码审核师 (×≤3)
+        ├── 前端设计师 (×1)
+        ├── 测试工程师 (×≤3)
+        │
+        ├── [Tier 2] DevOps 工程师 (×1)
+        ├── [Tier 3] 安全审计师 (×1)
+        ├── [Tier 3] 技术文档师 (×1)
+        └── [Tier 3] 项目经理 (×1)
 ```
+
+### 三级伸缩
+
+按项目规模选择团队配置，从小开始，按需扩展。
+
+| Tier | 适用场景 | 角色数 | 质量升级 |
+|------|----------|--------|----------|
+| **1 · Solo** | ≤5 模块，单人开发 | 7 个核心角色 | type-check + test + build |
+| **2 · Team** | 6-15 模块，1-2 并行团队 | + DevOps | + 覆盖率≥80%、依赖审计、ADR、dev/staging 环境 |
+| **3 · Enterprise** | 16+ 模块，3+ 并行团队 | + 安全审计、技术文档、项目经理 | + OWASP 扫描、密钥检测、契约/E2E 测试、事故响应、跨团队协调 |
+
+初始化时项目负责人扫描项目并推荐 tier。**甲方始终拥有最终决定权** — 可随意增减角色和规则。
 
 ### 核心特性
 
-- **塔式管理** — 一个项目负责人，多个专家。子 Agent 绝不直接与甲方沟通。
-- **6 阶段流水线** — 初始化 → 需求分析 → 方案评估 → 架构设计 → 实现（编程→审核→测试）→ 交付
-- **7 种专业角色** — 需求分析师、方案评估师、代码架构师、代码编程师、代码审核师、前端设计师、测试工程师
-- **并行执行** — 最多 3 个编程师/分析师/评估师并行处理独立模块
-- **内置质量关卡** — 代码审核区分架构级问题和编码级问题，精准返工
-- **迭代保护** — 各阶段设置最大迭代次数，上限时由甲方拍板决定
-- **甲方主导决策** — 每个里程碑、每次 git push 都需甲方确认
-- **领域不熟保护** — 甲方对某领域不熟悉时，先提醒注意事项再让甲方决定
-- **智能测试** — 可自动测试的自动化覆盖；需要数据库/内网/第三方API的产出人工测试指南
-- **Git 集成** — 标准化提交格式（类型+范围+文件+原因+结果）、分支策略、推送审批
-- **进度追踪** — `process.md` 记录每个子任务并标注 `@agent名` 实现责任追溯
+- **唯一接口** — 项目负责人是子 Agent 的唯一桥梁，子 Agent 绝不直接与甲方沟通
+- **6 阶段流水线** — 初始化 → 需求分析 → 方案评估 → 架构设计 → 实现（编程→审核→测试→UI审核）→ 交付验收与回顾
+- **11 种 Agent 角色** — 7 核心 + 4 扩展（DevOps、安全、文档、项目管理），按 tier 启用
+- **并行执行** — 通过 `[可并行]` 标记并发的模块，文件所有权零交集保障安全
+- **质量闸门** — 提交前（lint + type-check），合并前（test + build + coverage + audit），失败即阻塞
+- **Git 治理** — 标准化提交、feature 分支、合并前闸门（`merge --no-commit` → 验证 → 提交）、回滚流程、语义化版本 + changelog
+- **迭代保护** — 各阶段最大迭代上限，达到上限时甲方拍板
+- **智能测试** — 可测代码自动化覆盖；依赖数据库/内网/第三方API的产出人工测试指南
+- **甲方主导** — 每个里程碑、每次 push、每项 tier 决策都需甲方确认
+- **回顾复盘** — 交付后总结：什么做得好、什么出了问题、skill 本身如何优化
 
-### 工作流阶段
+### 文件结构
 
-| 阶段 | 参与 Agent | 产出物 |
-|------|-----------|--------|
-| **0. 初始化** | 项目负责人 | `agents_files/`、`.opencode/agents/`、虚拟环境、Git 配置 |
-| **1. 需求分析** | 负责人 + 分析师 (≤3) | `需求文档_vN.md` |
-| **2. 方案评估** | 评估师 (≤3) | `方案评估报告_vN.md` |
-| **3. 架构设计** | 架构师 (×1) | `architecture_design.md` |
-| **4. 实现阶段** | 编程师 (≤3) → 审核师 (≤3) → 测试师 (≤3) → 前端 (×1, 可选) | 代码 + 审核报告 + 测试报告 |
-| **5. 交付** | 项目负责人 | Git 提交（甲方确认后） |
-
-### Agent 角色详解
-
-| # | 角色 | 上限 | 职责 |
-|---|------|------|------|
-| 1 | **需求分析师** | 3 | 头脑风暴需求、识别模糊点、对甲方不熟领域预警 |
-| 2 | **方案评估师** | 3 | 评估可行性/耗时/风险，给出 ✅/⚠️/❌ 建议 |
-| 3 | **代码架构师** | 1 | 设计架构、模块拆分、依赖关系图 |
-| 4 | **代码编程师** | 3 | 按架构规范实现指定模块 |
-| 5 | **代码审核师** | 3 | 审核代码，区分架构级/编码级问题 |
-| 6 | **前端设计师** | 1 | UI/UX 审核（仅网页项目） |
-| 7 | **测试工程师** | 3 | 编写执行测试；不可测代码出人工测试指南 |
+```
+skills/better-code/
+├── SKILL.md                     # 编排入口：概览、伸缩矩阵、文件索引
+├── config-example.jsonc         # opencode.jsonc 命令注册示例
+├── roles/                       # Agent 角色定义（每角色一文件）
+│   ├── requirement-analyst.md   # Tier 1
+│   ├── evaluation-analyst.md    # Tier 1
+│   ├── code-architect.md        # Tier 1
+│   ├── code-programmer.md       # Tier 1
+│   ├── code-reviewer.md         # Tier 1
+│   ├── frontend-designer.md     # Tier 1（网页项目专属）
+│   ├── test-engineer.md         # Tier 1
+│   ├── devops-engineer.md       # Tier 2
+│   ├── security-auditor.md      # Tier 3
+│   ├── tech-writer.md           # Tier 3
+│   └── project-manager.md       # Tier 3
+├── phases/                      # 阶段流程
+│   ├── 01-initialization.md     # 项目扫描 + tier 推荐 + 工作区创建
+│   ├── 02-requirements.md       # 头脑风暴、需求澄清、文档格式
+│   ├── 03-evaluation.md         # 可行性、工时、风险分析
+│   ├── 04-architecture.md       # 模块拆分、依赖图、文件所有权
+│   ├── 05-implementation.md     # 编程→审核→测试→UI审核→合并
+│   └── 06-delivery.md           # 验收、版本标签、changelog、回顾
+├── governance/                  # 跨阶段治理规则
+│   ├── git-management.md        # 分支策略、提交模板、合并闸门、回滚
+│   ├── quality-gates.md         # type-check/test/build/coverage/lint/audit
+│   ├── environment-strategy.md  # dev/staging/prod 环境分离、密钥管理（Tier 2+）
+│   └── incident-response.md     # 事故分级、回滚 vs 热修复决策（Tier 3）
+└── templates/                   # 文档格式模板
+    ├── requirement-doc.md
+    ├── evaluation-report.md
+    ├── architecture-doc.md
+    ├── code-review-report.md
+    ├── adr.md                    # 架构决策记录（Tier 2+）
+    └── changelog.md
+```
 
 ### 安装
 
-1. 将 `SKILL.md` 复制到全局或项目 skills 目录：
+1. 将整个 `better-code/` 目录复制到 skills 位置：
 
    ```
    # 全局（所有项目可用）
-   ~/.config/opencode/skills/better-code/SKILL.md
+   ~/.config/opencode/skills/better-code/
 
    # 项目专属
-   .opencode/skills/better-code/SKILL.md
+   .opencode/skills/better-code/
    ```
 
 2. 在 `opencode.json` 或 `opencode.jsonc` 中注册 `/better-code` 命令（参考 `config-example.jsonc`）
@@ -252,13 +279,41 @@ MIT — see [LICENSE](LICENSE) file.
 
 ### 快速开始
 
-1. 在 opencode 中进入你的项目目录
+1. 在 opencode 中进入项目目录
 2. 输入 `/better-code`
-3. 项目负责人会检查 `agents_files/` 是否存在：
-   - **新项目**：输入 `请你先初始化` 初始化工作区
-   - **已有项目**：从 `process.md` 上次断点继续
-4. 回答初始化问题（技术栈、虚拟环境、工作范围）
-5. 描述你的需求——流水线启动
+3. 首次使用时输入 `请你先初始化`
+   - 项目负责人扫描项目并推荐 tier
+   - 你确认（或自定义）团队配置
+   - 工作区自动创建
+4. 描述需求 — 流水线启动
+
+### 工作流阶段
+
+| 阶段 | 参与 Agent | 产出物 |
+|------|-----------|--------|
+| **0. 初始化** | 项目负责人 | `agents_files/`、`.opencode/agents/`、环境、Git、tier 配置 |
+| **1. 需求分析** | 负责人 + 分析师 (≤3) | `需求文档_vN.md` |
+| **2. 方案评估** | 评估师 (≤3) | `方案评估报告_vN.md` |
+| **3. 架构设计** | 架构师 (×1) | `architecture_design.md` |
+| **4. 实现阶段** | 编程师→审核师→测试师→前端设计师 | 代码 + 审核报告 + 测试报告 |
+| **5. 交付验收** | 项目负责人 | 合并 → 版本标签 → changelog → 回顾 |
+
+### 项目工作区（初始化时自动创建）
+
+```
+project_root/
+├── agents_files/              # Agent 工作区（已 gitignore）
+│   ├── process.md             # 进度追踪，@agent名 标注责任
+│   ├── requirements/
+│   ├── evaluations/
+│   ├── architecture/
+│   ├── code_reviews/
+│   ├── tests/
+│   └── agent_memory/
+├── .opencode/
+│   └── agents/                # Agent 定义文件（按 tier 自动生成）
+└── .gitignore                 # 已追加 agents_files/
+```
 
 ### Git 提交规范
 
@@ -266,45 +321,16 @@ MIT — see [LICENSE](LICENSE) file.
 <type>(<scope>): <简短描述>
 
 修改文件:
-- path/to/file1.py (<新增/修改/删除>)
-- path/to/file2.py
+- path/to/file1.ext (<新增/修改/删除>)
 
-修改原因: <为什么做这个改动>
+修改原因: <为什么>
 
-修改结果: <改动后达到什么效果>
+修改结果: <效果>
 ```
 
-类型：`feat` | `fix` | `refactor` | `style` | `docs` | `test` | `chore`
+类型：`feat` | `fix` | `refactor` | `style` | `docs` | `test` | `chore` | `revert`
 
-### 项目工作区
-
-初始化后，项目将创建：
-
-```
-project_root/
-├── agents_files/              # Agent 工作区（已加入 .gitignore）
-│   ├── process.md             # 进度追踪总表
-│   ├── requirements/          # 需求文档
-│   ├── evaluations/           # 评估报告
-│   ├── architecture/          # 架构设计
-│   ├── code_reviews/          # 代码审核报告
-│   ├── tests/                 # 测试报告及指南
-│   └── agent_memory/          # Agent 状态持久化
-├── .opencode/
-│   └── agents/                # 7 个 Agent 定义文件
-│       ├── requirement-analyst.md
-│       ├── evaluation-analyst.md
-│       ├── code-architect.md
-│       ├── code-programmer.md
-│       ├── code-reviewer.md
-│       ├── frontend-designer.md
-│       └── test-engineer.md
-└── .gitignore                 # 已追加 agents_files/
-```
-
-### 权限管控
-
-子 Agent 的所有权限需经项目负责人审核。若负责人无法判断权限请求是否在项目范围内，会先询问甲方：*"辅助团队的工作范围是什么？"*（如：能否访问外网安装依赖、能否修改项目目录外的文件等）
+9 个触发事件强制执行提交，不等甲方提醒。
 
 ### 许可证
 

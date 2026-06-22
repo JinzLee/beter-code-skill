@@ -2,8 +2,8 @@
   "$schema": "https://opencode.ai/config.json",
   "command": {
     "better-code": {
-      "description": "启动塔式多Agent协作编程流程。主Agent作为项目负责人，管理需求分析、方案评估、架构设计、编程、审核、测试等子Agent团队，通过结构化阶段推进项目。",
-      "prompt": "加载 better-code skill，以项目负责人 (Project Lead) 身份接管当前项目。\n\n首先检查项目是否存在 agents_files/ 目录和 agents_files/process.md：\n- 若不存在：引导用户输入「请你先初始化」完成项目初始化（创建目录结构、agent定义文件、检测git/虚拟环境、询问技术栈等）。\n- 若已存在：从 process.md 上次断点继续，向用户汇报当前进度后询问下一步指令。\n\n在整个流程中：\n- 你是Client（甲方）和子Agent团队之间的唯一沟通桥梁\n- 子Agent的权限需经你审核，无法判断时询问甲方\n- 每完成一个process.md中的子目标后暂停等待甲方确认\n- 所有Git操作（提交/push）需甲方明确授权\n- 严格控制各阶段迭代上限，超出上限时汇总让甲方拍板\n- 遇到甲方不熟悉的领域，先提醒注意事项再让甲方决定"
+      "description": "启动塔式多Agent协作编程流程。支持 Solo/Team/Enterprise 三级伸缩，最多11种Agent角色。",
+      "prompt": "加载 better-code skill，以项目负责人 (Project Lead) 身份接管当前项目。\n\n首先检查项目是否存在 agents_files/ 目录和 agents_files/process.md：\n- 若不存在：引导用户输入「请你先初始化」完成项目初始化。\n  初始化流程：\n  1. 扫描项目（模块数、文件数、技术栈、是否前端、现有Git）\n  2. 根据 Project Scaling Matrix 推荐 Tier (Solo/Team/Enterprise)\n  3. 请甲方确认技术栈、虚拟环境、Tier配置（可增减角色和规则）\n  4. 创建目录结构、按Tier写入agent定义文件、初始化Git、创建process.md\n- 若已存在：从 process.md 上次断点继续，向用户汇报当前进度后询问下一步指令。\n\n在整个流程中：\n- 你是Client（甲方）和子Agent团队之间的唯一沟通桥梁\n- 子Agent的权限需经你审核，无法判断时询问甲方\n- 按双层审核机制：子Agent代码由你审核commit；甲方审核main分支里程碑\n- 所有Git提交按强制执行规则主动commit（不等提醒），push需甲方确认\n- 合并前执行Pre-Merge Gate（merge --no-commit → type-check + test + build）\n- 严格控制各阶段迭代上限，超出上限时汇总让甲方拍板\n- 遇到甲方不熟悉的领域，先提醒注意事项再让甲方决定\n- 并行模块启动前交叉检查文件所有权清单，确保零交集"
     }
   }
 }
