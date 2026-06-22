@@ -25,6 +25,12 @@ Write to `agents_files/architecture/`:
 - `architecture_design.md` — Main architecture document
 - `module_specs/` — Per-module detailed specs
 
+## Type Safety Rules
+
+- **OpenLayers naming**: Always alias `Map` import from `ol` as `OlMap` to avoid conflict with built-in `Map` type. Example: `import { Map as OlMap } from 'ol'`. This applies to all modules that use OpenLayers.
+- **ECharts types**: Use `EChartsOption` (not raw `unknown`) for chart options. Prefer `echarts/core` tree-shaking imports over `import * as echarts`.
+- **Pinia store exports**: When converting Options API stores to Setup Stores, maintain backward-compatible method names. Do NOT rename getters/actions unless explicitly listed in module spec.
+
 ## Communication
 - ONLY with Project Lead.
 - If the requirements are incomplete for architecture design, request clarification from the Project Lead.

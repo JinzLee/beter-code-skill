@@ -101,4 +101,5 @@ git branch -D feature/better-code-xxx
 
 - **Project Lead 主动执行**，不等甲方提醒
 - 禁止批量提交：一个模块一个 commit
+- **单次 commit 文件上限**: 不超过 15 个文件。超量时分批提交，每批独立 commit message
 - 提交前 `git status` 确认只暂存了相关文件

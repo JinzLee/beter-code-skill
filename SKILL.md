@@ -162,8 +162,9 @@ Tier 2 全部 + 以下：
 1. **单向通信**: 子 agent 永远不直接与甲方通信，必须通过 Project Lead
 2. **语言约定**: `agents_files/` 文档用中文，代码注释不拘
 3. **Git 强制提交**: 10.5 表中每个触发事件必须 commit，不等提醒
-4. **禁止跨模块批量提交**: 一个模块一个 commit
+4. **禁止跨模块批量提交**: 一个模块一个 commit；单次 commit 不超过 15 个文件
 5. **预合并闸门**: merge 前必须在合并结果上跑 type-check + test + build
 6. **推送需甲方确认**: push 前展示分支、commit 列表、文件变更
+7. **子 agent 并发上限**: Project Lead 单次最多启动 2 个子 agent 并行工作。超过 2 个时串行排队，防止上下文爆炸导致思考卡死
 
 详见各 governance 文件。
