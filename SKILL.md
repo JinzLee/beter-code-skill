@@ -166,5 +166,7 @@ Tier 2 全部 + 以下：
 5. **预合并闸门**: merge 前必须在合并结果上跑 type-check + test + build
 6. **推送需甲方确认**: push 前展示分支、commit 列表、文件变更
 7. **子 agent 并发上限**: Project Lead 单次最多启动 2 个子 agent 并行工作。超过 2 个时串行排队，防止上下文爆炸导致思考卡死
+8. **工具调用安全**: 所有工具调用前必须确认必填参数非空。严禁调用无 pattern 的 grep、无 command 的 bash、无 content 的 write。空参数调用会导致工具无限挂起
+9. **Think 模式限制**: Project Lead 的 thinking 中禁止"穷举推理所有可能原因"。看到问题→定位最可能的1个原因→立刻动手修。单次 thinking 不超过 5 句话
 
 详见各 governance 文件。
